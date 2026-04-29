@@ -10,17 +10,19 @@ from ui.theme import COLORS, FONTS, PADDING
 class Sidebar:
     """Class to manage sidebar navigation"""
     
-    def __init__(self, parent, on_feature_click=None, on_logout=None):
+    def __init__(self, parent, on_feature_click=None, on_logout=None, on_user_info=None):
         """
         Initialize sidebar
         Args:
             parent: Parent widget
             on_feature_click: Callback when feature is clicked
             on_logout: Callback when logout is clicked
+            on_user_info: Callback when user info icon is clicked
         """
         self.parent = parent
         self.on_feature_click = on_feature_click
         self.on_logout = on_logout
+        self.on_user_info = on_user_info
         self.current_feature = None
         self.feature_buttons = {}
         
@@ -49,15 +51,6 @@ class Sidebar:
             fg=COLORS["sidebar_text"]
         )
         logo_text.pack(anchor="w")
-        
-        version = tk.Label(
-            logo_frame,
-            text="v1.0.0",
-            font=("Arial", 8),
-            bg=COLORS["sidebar_bg"],
-            fg=COLORS["gray"]
-        )
-        version.pack(anchor="w")
         
         # Separator
         sep1 = tk.Canvas(
@@ -108,6 +101,23 @@ class Sidebar:
         )
         sep2.pack(fill=tk.X, pady=PADDING["md"])
         
+        # User icon only (no username displayed)
+        user_info_frame = tk.Frame(self.sidebar_frame, bg=COLORS["sidebar_bg"])
+        user_info_frame.pack(fill=tk.X, padx=PADDING["md"], pady=(0, PADDING["md"]))
+        user_icon_btn = tk.Button(
+            user_info_frame,
+            text="👤",
+            font=("Arial", 22),
+            bg=COLORS["sidebar_bg"],
+            fg=COLORS["sidebar_text"],
+            relief="flat",
+            activebackground=COLORS["sidebar_bg"],
+            activeforeground=COLORS["sidebar_text"],
+            cursor="hand2",
+            command=self.show_user_info if self.on_user_info else lambda: None
+        )
+        user_icon_btn.pack(anchor="w")
+        
         # Bottom section (settings, logout)
         bottom_frame = tk.Frame(self.sidebar_frame, bg=COLORS["sidebar_bg"])
         bottom_frame.pack(fill=tk.X, padx=PADDING["md"], pady=PADDING["md"])
@@ -147,6 +157,11 @@ class Sidebar:
         logout_btn.bind("<Enter>", lambda e: logout_btn.config(bg="#c0392b"))
         logout_btn.bind("<Leave>", lambda e: logout_btn.config(bg="#e74c3c"))
     
+    def show_user_info(self):
+        """Trigger user info callback"""
+        if self.on_user_info:
+            self.on_user_info()
+
     def create_feature_button(self, parent, label, feature_name):
         """Create a feature button"""
         btn = tk.Button(

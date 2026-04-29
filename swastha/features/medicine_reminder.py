@@ -118,6 +118,7 @@ class MedicineReminderUI:
             height=12
         )
         self.medicines_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.medicines_listbox.bind("<<ListboxSelect>>", lambda _: self.show_selected_medicine_details())
         scrollbar.config(command=self.medicines_listbox.yview)
         
         # Delete button
@@ -128,7 +129,30 @@ class MedicineReminderUI:
             command=self.delete_medicine,
             padx=20
         )
-        delete_btn.pack(padx=PADDING["md"], pady=PADDING["md"], fill=tk.X)
+        delete_btn.pack(padx=PADDING["md"], pady=(0, PADDING["sm"]), fill=tk.X)
+
+        # View details button
+        view_btn = CustomButton(
+            right_panel,
+            text="View Details",
+            bg=COLORS["info"],
+            command=self.view_medicine_details,
+            padx=20
+        )
+        view_btn.pack(padx=PADDING["md"], pady=(0, PADDING["sm"]), fill=tk.X)
+
+        # Details label
+        self.details_text = tk.Label(
+            right_panel,
+            text="Select a medicine to see details.",
+            font=FONTS["body_small"],
+            bg=COLORS["white"],
+            fg=COLORS["dark_gray"],
+            justify="left",
+            wraplength=260,
+            anchor="nw"
+        )
+        self.details_text.pack(fill=tk.BOTH, expand=True, padx=PADDING["md"], pady=(0, PADDING["md"]))
     
     def add_medicine(self):
         """Add new medicine"""
@@ -165,11 +189,12 @@ class MedicineReminderUI:
         if not db.is_connected():
             db.connect()
         
-        query = "SELECT id, medicine_name, dosage, time_hours FROM medicines WHERE user_id = %s"
+        query = "SELECT id, medicine_name, dosage, time_hours, notes FROM medicines WHERE user_id = %s"
         results = db.execute_query(query, (self.user_id,))
         
         self.medicines_listbox.delete(0, tk.END)
         self.medicines_list = results if results else []
+        self.details_text.config(text="Select a medicine to see details.")
         
         for medicine in self.medicines_list:
             display_text = f"{medicine['medicine_name']} - {medicine['dosage']} ({medicine['time_hours']})"
@@ -193,3 +218,36 @@ class MedicineReminderUI:
             if db.execute_update(query, (medicine['id'],)):
                 messagebox.showinfo("Success", "Medicine deleted")
                 self.load_medicines()
+
+    def show_selected_medicine_details(self):
+        """Show selected medicine details"""
+        selection = self.medicines_listbox.curselection()
+        if not selection:
+            return
+        medicine = self.medicines_list[selection[0]]
+        notes = medicine.get('notes', '') or 'No notes provided.'
+        details = (
+            f"Medicine: {medicine['medicine_name']}\n"
+            f"Dosage: {medicine['dosage']}\n"
+            f"Times: {medicine['time_hours']}\n"
+            f"Notes: {notes}"
+        )
+        self.details_text.config(text=details)
+
+    def view_medicine_details(self):
+        """View details for selected medicine"""
+        selection = self.medicines_listbox.curselection()
+        if not selection:
+            messagebox.showerror("Error", "Please select a medicine to view details")
+            return
+        medicine = self.medicines_list[selection[0]]
+        notes = medicine.get('notes', '') or 'No notes provided.'
+        messagebox.showinfo(
+            "Medicine Details",
+            (
+                f"Medicine: {medicine['medicine_name']}\n"
+                f"Dosage: {medicine['dosage']}\n"
+                f"Times: {medicine['time_hours']}\n"
+                f"Notes: {notes}"
+            )
+        )

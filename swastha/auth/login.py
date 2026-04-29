@@ -122,7 +122,7 @@ class LoginWindow:
             bg="#3498db",
             fg="white",
             relief=tk.FLAT,
-            cursor="hand2",
+            cursor="hand2","Enter",
             command=self.login,
             padx=20,
             pady=10
@@ -209,12 +209,12 @@ class LoginWindow:
             messagebox.showerror("Error", "Username not found")
     
     def show_signup(self):
-        """Show signup window"""
-        signup_window = SignupWindow(self.root, self)
+        """Show signup screen in the same window"""
+        SignupWindow(self.root, self, use_root=True)
     
     def show_reset_password(self):
-        """Show reset password window"""
-        reset_window = ResetPasswordWindow(self.root, self)
+        """Show reset password screen in the same window"""
+        ResetPasswordWindow(self.root, self, use_root=True)
     
     def get_current_user(self):
         """Get current logged-in user"""

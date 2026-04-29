@@ -16,26 +16,41 @@ from utils.helpers import PasswordHelper
 class SignupWindow:
     """Class to handle signup window"""
     
-    def __init__(self, parent, login_window):
+    def __init__(self, parent, login_window, use_root=False):
         """
         Initialize signup window
         Args:
             parent: Parent window
             login_window: Reference to login window
+            use_root: Use parent as main window instead of Toplevel
         """
         self.parent = parent
         self.login_window = login_window
-        self.signup_root = tk.Toplevel(parent)
+        self.use_root = use_root
+
+        if self.use_root:
+            for widget in self.parent.winfo_children():
+                widget.destroy()
+            self.parent.title("Swastha - Sign Up")
+            self.container = self.parent
+        else:
+            self.signup_root = tk.Toplevel(parent)
+            self.signup_root.title("Swastha - Sign Up")
+            self.signup_root.geometry("500x700+400+100")
+            self.signup_root.resizable(False, False)
+            self.container = self.signup_root
+
         self.setup_ui()
     
     def setup_ui(self):
         """Setup signup UI"""
-        self.signup_root.title("Swastha - Sign Up")
-        self.signup_root.geometry("500x700+400+100")
-        self.signup_root.resizable(False, False)
+        if not self.use_root:
+            self.signup_root.title("Swastha - Sign Up")
+            self.signup_root.geometry("500x700+400+100")
+            self.signup_root.resizable(False, False)
         
         # Main frame
-        main_frame = tk.Frame(self.signup_root, bg="#f0f0f0", padx=30, pady=30)
+        main_frame = tk.Frame(self.container, bg="#f0f0f0", padx=30, pady=30)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Title
@@ -164,10 +179,17 @@ class SignupWindow:
             fg="#3498db",
             relief=tk.FLAT,
             cursor="hand2",
-            command=self.signup_root.destroy,
+            command=self.go_back,
             padx=0
         )
         back_btn.pack(anchor="w")
+
+    def go_back(self):
+        """Go back to login screen"""
+        if self.use_root:
+            self.login_window.setup_ui()
+        else:
+            self.signup_root.destroy()
     
     def register(self):
         """Register new user"""
@@ -216,6 +238,9 @@ class SignupWindow:
         
         if db.execute_update(insert_query, (username, email, hashed_password)):
             messagebox.showinfo("Success", "Account created successfully! You can now login.")
-            self.signup_root.destroy()
+            if self.use_root:
+                self.login_window.setup_ui()
+            else:
+                self.signup_root.destroy()
         else:
             messagebox.showerror("Error", "Failed to create account. Please try again.")

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Quick Start Script for Swastha
 Verifies all dependencies and starts the application

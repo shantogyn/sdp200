@@ -1,6 +1,6 @@
 """
-Swastha - AI Smart Healthcare System
-Main Application Entry Point
+Swastha 
+Main Application 
 """
 
 import tkinter as tk
@@ -29,7 +29,8 @@ class SwasthaApp:
         
         # Set minimum window size
         self.root.minsize(800, 600)
-        
+        #set maximum window size
+       # self.root.maxsize(1920, 1080)
         # Center window on screen
         self.center_window()
         

@@ -16,26 +16,41 @@ from utils.helpers import PasswordHelper
 class ResetPasswordWindow:
     """Class to handle password reset"""
     
-    def __init__(self, parent, login_window):
+    def __init__(self, parent, login_window, use_root=False):
         """
         Initialize reset password window
         Args:
             parent: Parent window
             login_window: Reference to login window
+            use_root: Use parent as main window instead of Toplevel
         """
         self.parent = parent
         self.login_window = login_window
-        self.reset_root = tk.Toplevel(parent)
+        self.use_root = use_root
+
+        if self.use_root:
+            for widget in self.parent.winfo_children():
+                widget.destroy()
+            self.parent.title("Swastha - Reset Password")
+            self.container = self.parent
+        else:
+            self.reset_root = tk.Toplevel(parent)
+            self.reset_root.title("Swastha - Reset Password")
+            self.reset_root.geometry("500x500+400+150")
+            self.reset_root.resizable(False, False)
+            self.container = self.reset_root
+
         self.setup_ui()
     
     def setup_ui(self):
         """Setup reset password UI"""
-        self.reset_root.title("Swastha - Reset Password")
-        self.reset_root.geometry("500x500+400+150")
-        self.reset_root.resizable(False, False)
+        if not self.use_root:
+            self.reset_root.title("Swastha - Reset Password")
+            self.reset_root.geometry("500x500+400+150")
+            self.reset_root.resizable(False, False)
         
         # Main frame
-        main_frame = tk.Frame(self.reset_root, bg="#f0f0f0", padx=30, pady=30)
+        main_frame = tk.Frame(self.container, bg="#f0f0f0", padx=30, pady=30)
         main_frame.pack(fill=tk.BOTH, expand=True)
         
         # Title
@@ -152,10 +167,17 @@ class ResetPasswordWindow:
             fg="#3498db",
             relief=tk.FLAT,
             cursor="hand2",
-            command=self.reset_root.destroy,
+            command=self.go_back,
             padx=0
         )
         back_btn.pack(anchor="w")
+
+    def go_back(self):
+        """Go back to login screen"""
+        if self.use_root:
+            self.login_window.setup_ui()
+        else:
+            self.reset_root.destroy()
     
     def reset_password(self):
         """Reset password for user"""
@@ -199,6 +221,7 @@ class ResetPasswordWindow:
         
         if db.execute_update(update_query, (hashed_password, username)):
             messagebox.showinfo("Success", "Password reset successfully! You can now login.")
-            self.reset_root.destroy()
-        else:
-            messagebox.showerror("Error", "Failed to reset password. Please try again.")
+            if self.use_root:
+                self.login_window.setup_ui()
+            else:
+                self.reset_root.destroy()

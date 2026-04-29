@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """
 Comprehensive Swastha Setup & Test Script
 Verifies all components are working correctly
