@@ -301,12 +301,7 @@ Possible additions:
 - Multi-language support
 - Cloud backup
 
-## ✨ Version
-
-**Swastha v1.0.0** - Initial Release
 
 ---
 
-**Built with ❤️ using Python & Tkinter**
-
-Happy healthcare management! 🏥
+**Built with ❤️ using Python & Tkinter **
